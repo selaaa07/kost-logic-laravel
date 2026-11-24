@@ -2,11 +2,15 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\LandingController;
+use App\Http\Controllers\KwitansiController;
+use App\Http\Controllers\PasswordController;
 
-// Redirect awal sementara ke login (nanti diganti Landing Page oleh Puji)
-Route::get('/', function () {
-    return redirect()->route('login');
-});
+Route::get('/', [LandingController::class, 'index']);
+
+Route::get('/kwitansi/{id}', [KwitansiController::class, 'cetak'])
+    ->middleware('auth')
+    ->name('kwitansi.cetak');
 
 // Auth Routes
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -20,9 +24,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     })->name('admin.dashboard');
 });
 
-// Route Khusus Penghuni (sementara untuk tes middleware)
+// Route Khusus Penghuni
 Route::middleware(['auth', 'role:penghuni'])->prefix('user')->group(function () {
     Route::get('/dashboard', function () {
         return 'Halo Penghuni (' . auth()->user()->name . ')! Login berhasil. <form method="POST" action="/logout">' . csrf_field() . '<button type="submit">Logout</button></form>';
     })->name('user.dashboard');
+
+    Route::get('/ubah-password', [PasswordController::class, 'form'])->name('user.ubah-password');
+    Route::post('/ubah-password', [PasswordController::class, 'update'])->name('user.ubah-password.update');
 });
