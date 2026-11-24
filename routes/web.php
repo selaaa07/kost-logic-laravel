@@ -7,6 +7,8 @@ use App\Http\Controllers\KwitansiController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\PenghuniController;
 use App\Http\Controllers\KomplainController;
+use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\KamarController;
 
 Route::get('/', [LandingController::class, 'index']);
 
@@ -21,11 +23,11 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 
 // Route Khusus Admin
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
-    Route::get('/dashboard', function () {
-        return 'Halo Admin! Login berhasil. <form method="POST" action="/logout">' . csrf_field() . '<button type="submit">Logout</button></form>';
-    })->name('admin.dashboard');
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
-    Route::resource('/penghuni', PenghuniController::class)->names('admin.penghuni');
+    Route::resource('kamar', KamarController::class);
+    Route::resource('penghuni', PenghuniController::class)->names('admin.penghuni');
+
     Route::get('/komplain', [KomplainController::class, 'indexAdmin'])->name('admin.komplain.index');
     Route::patch('/komplain/{id}/selesai', [KomplainController::class, 'selesai'])->name('admin.komplain.selesai');
 });
