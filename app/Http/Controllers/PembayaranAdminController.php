@@ -7,6 +7,7 @@ use App\Models\Pembayaran;
 use App\Models\Penghuni;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class PembayaranAdminController extends Controller
 {
@@ -106,18 +107,73 @@ class PembayaranAdminController extends Controller
             'nominal'       => 'required|numeric|min:0',
             'status'        => 'required|in:belum_lunas,menunggu,lunas',
             'metode_bayar'  => 'nullable|in:transfer,tunai',
-            'nama_bank'     => 'nullable|string|max:50',
             'tanggal_bayar' => 'nullable|date',
+            'bukti_bayar'   => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
+
+        if ($request->hasFile('bukti_bayar')) {
+            $data['bukti_bayar'] = $request->file('bukti_bayar')->store('bukti_bayar', 'public');
+        }
 
         if ($data['status'] === 'lunas' && empty($data['tanggal_bayar'])) {
             $data['tanggal_bayar'] = Carbon::now()->toDateString();
         }
 
+        $data['nama_bank'] = null;
+
         Pembayaran::create($data);
 
         return redirect()->route('admin.pembayaran.index')
             ->with('sukses', 'Tagihan pembayaran berhasil ditambahkan.');
+    }
+
+    /**
+     * Edit pembayaran (termasuk membatalkan verifikasi lunas & upload/ganti bukti transfer).
+     */
+    public function update(Request $request, $id)
+    {
+        $pembayaran = Pembayaran::findOrFail($id);
+
+        $data = $request->validate([
+            'bulan_tagihan' => 'required|string|max:50',
+            'nominal'       => 'required|numeric|min:0',
+            'tanggal_bayar' => 'nullable|date',
+            'status'        => 'required|in:belum_lunas,menunggu,lunas',
+            'metode_bayar'  => 'nullable|in:transfer,tunai',
+            'bukti_bayar'   => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ]);
+
+        if ($request->hasFile('bukti_bayar')) {
+            if ($pembayaran->bukti_bayar && Storage::disk('public')->exists($pembayaran->bukti_bayar)) {
+                Storage::disk('public')->delete($pembayaran->bukti_bayar);
+            }
+            $data['bukti_bayar'] = $request->file('bukti_bayar')->store('bukti_bayar', 'public');
+        }
+
+        // Pastikan nama_bank selalu bersih (tidak dipakai lagi)
+        $data['nama_bank'] = null;
+
+        $pembayaran->update($data);
+
+        return redirect()->route('admin.pembayaran.index')
+            ->with('sukses', 'Data pembayaran #' . $pembayaran->id . ' berhasil diperbarui.');
+    }
+
+    /**
+     * Hapus data pembayaran beserta file bukti transfernya jika ada.
+     */
+    public function destroy($id)
+    {
+        $pembayaran = Pembayaran::findOrFail($id);
+
+        if ($pembayaran->bukti_bayar && Storage::disk('public')->exists($pembayaran->bukti_bayar)) {
+            Storage::disk('public')->delete($pembayaran->bukti_bayar);
+        }
+
+        $pembayaran->delete();
+
+        return redirect()->route('admin.pembayaran.index')
+            ->with('sukses', 'Data pembayaran berhasil dihapus.');
     }
 
     /**

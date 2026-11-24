@@ -106,7 +106,7 @@
                                     <span class="badge bg-warning text-dark">Tunai (Cash)</span>
                                 @elseif ($p->bukti_bayar)
                                     <button type="button" class="btn btn-info btn-sm text-white" data-bs-toggle="modal" data-bs-target="#modalBukti{{ $p->id }}">
-                                        <i class="bi bi-image me-1"></i> Lihat Bukti ({{ $p->nama_bank ?? 'Transfer' }})
+                                        <i class="bi bi-image me-1"></i> Lihat Bukti
                                     </button>
 
                                     {{-- Modal Lihat Bukti Transfer --}}
@@ -121,7 +121,6 @@
                                                 </div>
                                                 <div class="modal-body text-center">
                                                     <p class="small text-muted mb-2">
-                                                        Bank: <strong>{{ $p->nama_bank ?? '-' }}</strong> |
                                                         Nominal: <strong>Rp {{ number_format($p->nominal, 0, ',', '.') }}</strong>
                                                     </p>
                                                     <img src="{{ asset('storage/' . $p->bukti_bayar) }}" alt="Bukti Transfer" class="img-fluid rounded border">
@@ -175,6 +174,78 @@
                                             <i class="bi bi-printer me-1"></i> Cetak Kwitansi
                                         </a>
                                     @endif
+
+                                    {{-- Tombol Edit --}}
+                                    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalEdit{{ $p->id }}">
+                                        Edit
+                                    </button>
+
+                                    {{-- Tombol Hapus --}}
+                                    <form action="{{ route('admin.pembayaran.destroy', $p->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus data pembayaran #{{ $p->id }}?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                                            Hapus
+                                        </button>
+                                    </form>
+                                </div>
+
+                                {{-- Modal Edit Pembayaran (Batal Verifikasi / Upload Bukti Manual) --}}
+                                <div class="modal fade" id="modalEdit{{ $p->id }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-primary text-white">
+                                                <h6 class="modal-title fw-bold">Edit Pembayaran #{{ $p->id }} — {{ $p->penghuni->user->name ?? '-' }}</h6>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <form action="{{ route('admin.pembayaran.update', $p->id) }}" method="POST" enctype="multipart/form-data">
+                                                @csrf
+                                                @method('PUT')
+                                                <div class="modal-body">
+                                                    <div class="mb-3">
+                                                        <label class="form-label small fw-semibold">Bulan Tagihan</label>
+                                                        <input type="text" name="bulan_tagihan" class="form-control" value="{{ $p->bulan_tagihan }}" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label small fw-semibold">Nominal (Rp)</label>
+                                                        <input type="number" name="nominal" class="form-control" value="{{ (int) $p->nominal }}" min="0" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label small fw-semibold">Tanggal Bayar</label>
+                                                        <input type="date" name="tanggal_bayar" class="form-control" value="{{ $p->tanggal_bayar }}">
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label small fw-semibold">Metode Bayar</label>
+                                                        <select name="metode_bayar" class="form-select">
+                                                            <option value="" {{ empty($p->metode_bayar) ? 'selected' : '' }}>-- Belum Dipilih --</option>
+                                                            <option value="transfer" {{ $p->metode_bayar === 'transfer' ? 'selected' : '' }}>Transfer Bank</option>
+                                                            <option value="tunai" {{ $p->metode_bayar === 'tunai' ? 'selected' : '' }}>Tunai (Cash)</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label small fw-semibold">Status Pembayaran</label>
+                                                        <select name="status" class="form-select" required>
+                                                            <option value="belum_lunas" {{ $p->status === 'belum_lunas' ? 'selected' : '' }}>Belum Lunas</option>
+                                                            <option value="menunggu" {{ $p->status === 'menunggu' ? 'selected' : '' }}>Menunggu Verifikasi</option>
+                                                            <option value="lunas" {{ $p->status === 'lunas' ? 'selected' : '' }}>Lunas</option>
+                                                        </select>
+                                                        <div class="form-text">Ubah ke Belum Lunas / Menunggu jika ingin membatalkan verifikasi Lunas.</div>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label small fw-semibold">Upload / Ganti Bukti Transfer (Opsional)</label>
+                                                        @if ($p->bukti_bayar)
+                                                            <div class="small text-muted mb-1">Saat ini sudah ada bukti tersimpan.</div>
+                                                        @endif
+                                                        <input type="file" name="bukti_bayar" class="form-control" accept="image/*">
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                                                    <button type="submit" class="btn btn-primary btn-sm">Simpan Perubahan</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
@@ -199,7 +270,7 @@
                 <h6 class="modal-title fw-bold">Tambah Tagihan Manual</h6>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form action="{{ route('admin.pembayaran.store') }}" method="POST">
+            <form action="{{ route('admin.pembayaran.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
                     <div class="mb-3">
@@ -235,6 +306,10 @@
                             <option value="transfer">Transfer Bank</option>
                             <option value="tunai">Tunai (Cash)</option>
                         </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Upload Bukti Transfer (Opsional)</label>
+                        <input type="file" name="bukti_bayar" class="form-control" accept="image/*">
                     </div>
                 </div>
                 <div class="modal-footer">
