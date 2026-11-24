@@ -6,23 +6,29 @@
     <title>@yield('title', 'Beranda') - Kost Logic</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #f8f9fa; }
+        body { background-color: #eef4ff; font-family: 'Poppins', sans-serif; }
+        .navbar-biru { background-color: #34568b; }
+        .navbar-biru .nav-link { color: #dbe6f5; }
+        .navbar-biru .nav-link:hover,
+        .navbar-biru .nav-link.active { color: #ffffff; }
+        .footer-biru { background-color: #ffffff; border-top: 1px solid #dee2e6; }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
 
-    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #212529;">
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-biru">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="{{ url('/') }}">
-                <i class="bi bi-building me-2"></i>Kost Logic
-            </a>
+            <a class="navbar-brand fw-bold" href="{{ url('/') }}">Kost Logic</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuUtama">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="menuUtama">
                 <ul class="navbar-nav ms-auto align-items-lg-center">
-                    @if (session()->has('user_kamar'))
+                    @auth
                         {{-- Penghuni sudah login --}}
                         <li class="nav-item">
                             <a class="nav-link {{ request()->is('user/dashboard*') ? 'active' : '' }}" href="{{ url('/user/dashboard') }}">Dashboard</a>
@@ -33,13 +39,13 @@
                         <li class="nav-item">
                             <a class="nav-link {{ request()->is('user/ubah-password*') ? 'active' : '' }}" href="{{ url('/user/ubah-password') }}">Ubah Password</a>
                         </li>
-                        <li class="nav-item text-secondary small ms-lg-3 me-lg-2">
-                            <i class="bi bi-person-circle me-1"></i>Kamar {{ session('user_kamar') }}
+                        <li class="nav-item text-white small ms-lg-3 me-lg-2">
+                            <i class="bi bi-person-circle me-1"></i>{{ Auth::user()->name }}
                         </li>
                         <li class="nav-item">
-                            <form action="{{ url('/logout') }}" method="POST" class="d-inline">
+                            <form action="{{ route('logout') }}" method="POST" class="d-inline">
                                 @csrf
-                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                <button type="submit" class="btn btn-outline-light btn-sm">
                                     <i class="bi bi-box-arrow-right me-1"></i>Logout
                                 </button>
                             </form>
@@ -50,9 +56,9 @@
                             <a class="nav-link {{ request()->is('/') ? 'active' : '' }}" href="{{ url('/') }}">Beranda</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->is('login*') ? 'active' : '' }}" href="{{ url('/login') }}">Login</a>
+                            <a class="nav-link {{ request()->is('login*') ? 'active' : '' }}" href="{{ route('login') }}">Login</a>
                         </li>
-                    @endif
+                    @endauth
                 </ul>
             </div>
         </div>
@@ -81,8 +87,9 @@
         @yield('content')
     </main>
 
-    <footer class="bg-white border-top text-center text-muted py-3">
-        <small>&copy; {{ date('Y') }} Kost Logic. Semua hak dilindungi.</small>
+    <footer class="footer-biru text-center py-4">
+        <p class="mb-1 text-secondary">Ngekost pakai logic, nyaman tanpa panik</p>
+        <p class="mb-0 text-secondary">&copy; {{ date('Y') }} KostLogic.</p>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
