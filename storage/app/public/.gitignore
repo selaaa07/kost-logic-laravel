@@ -1,2 +1,6 @@
 *
 !.gitignore
+!foto_kamar/
+!foto_kamar/**
+!bukti_komplain/
+!bukti_komplain/**
