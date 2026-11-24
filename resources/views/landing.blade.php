@@ -10,36 +10,20 @@
             <div class="col-md-4">
                 <div class="card h-100">
                     @if ($kamar->foto)
-                        <img src="{{ asset('storage/' . $kamar->foto) }}" class="card-img-top" alt="Kamar {{ $kamar->nomor_kamar }}">
+                        <img src="{{ asset('storage/' . $kamar->foto) }}"
+                             class="card-img-top"
+                             style="height: 220px; object-fit: cover;"
+                             alt="Kamar {{ $kamar->nomor_kamar }}">
+                    @else
+                        <div class="bg-light text-muted d-flex align-items-center justify-content-center"
+                             style="height: 220px;">
+                            <small>Foto belum tersedia</small>
+                        </div>
                     @endif
                     <div class="card-body">
                         <h5 class="card-title">Kamar {{ $kamar->nomor_kamar }}</h5>
                         <p class="card-text text-muted small">{{ $kamar->fasilitas }}</p>
-                        <p class="fw-bold">Rp {{ number_format($kamar->harga, 0, ',', '.') }} / bulan</p>
-
-                        <button type="button" class="btn btn-outline-primary btn-sm"
-                                data-bs-toggle="modal" data-bs-target="#foto{{ $kamar->id }}">
-                            <i class="bi bi-image me-1"></i>Lihat foto
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal fade" id="foto{{ $kamar->id }}" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-lg modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Kamar {{ $kamar->nomor_kamar }}</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body text-center">
-                            @if ($kamar->foto)
-                                <img src="{{ asset('storage/' . $kamar->foto) }}" class="img-fluid rounded"
-                                     alt="Foto kamar {{ $kamar->nomor_kamar }}">
-                            @else
-                                <p class="text-muted my-4">Foto kamar ini belum tersedia.</p>
-                            @endif
-                        </div>
+                        <p class="fw-bold mb-0">Rp {{ number_format($kamar->harga, 0, ',', '.') }} / bulan</p>
                     </div>
                 </div>
             </div>
