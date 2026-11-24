@@ -91,10 +91,15 @@ class PenghuniController extends Controller
             }
             $penghuni->user->update($userData);
 
+            // Jika pindah kamar, kosongkan kamar lama
             if ($penghuni->kamar_id != $request->kamar_id) {
                 Kamar::where('id', $penghuni->kamar_id)->update(['status' => 'kosong']);
-                Kamar::where('id', $request->kamar_id)->update(['status' => 'terisi']);
             }
+
+            // Jika status Nonaktif (0 / Keluar), kamar otomatis kosong; jika Aktif (1), kamar terisi
+            Kamar::where('id', $request->kamar_id)->update([
+                'status' => $request->boolean('status_aktif') ? 'terisi' : 'kosong',
+            ]);
 
             $penghuni->update([
                 'kamar_id'      => $request->kamar_id,

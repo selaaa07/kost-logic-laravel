@@ -31,6 +31,17 @@ class AuthController extends Controller
             if (Auth::user()->role === 'admin') {
                 return redirect()->intended('/admin/dashboard');
             }
+            // Cek apakah akun penghuni masih aktif
+            $penghuni = Auth::user()->penghuni;
+            if (!$penghuni || !$penghuni->status_aktif) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return back()->withErrors([
+                    'email' => 'Akun Anda sudah tidak aktif (sudah keluar dari kost).',
+                ])->onlyInput('email');
+            }
 
             return redirect()->intended('/user/dashboard');
         }
