@@ -13,6 +13,7 @@ class Komplain extends Model
         'kamar_id',
         'user_id',
         'keluhan',
+        'foto',
         'status',
     ];
 
