@@ -44,7 +44,7 @@
 
                         <div class="mb-3">
                             <label class="form-label">Foto Bukti Kerusakan (Opsional)</label>
-                            <input type="file" name="foto" class="form-control @error('foto') is-invalid @enderror" accept="image/*">
+                            <input type="file" name="foto" class="form-control @error('foto') is-invalid @enderror" accept=".jpg,.jpeg,.png">
                             <small class="text-muted">Format: JPG, JPEG, PNG. Maksimal 2MB.</small>
                             @error('foto') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
@@ -78,9 +78,11 @@
                                     <td>{{ $item->keluhan }}</td>
                                     <td class="text-center">
                                         @if($item->foto)
-                                            <a href="{{ asset('storage/' . $item->foto) }}" target="_blank">
-                                                <img src="{{ asset('storage/' . $item->foto) }}" alt="Bukti" width="70" class="img-thumbnail">
-                                            </a>
+                                            <button type="button" class="btn btn-outline-primary btn-sm"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#bukti{{ $item->id }}">
+                                                Lihat bukti
+                                            </button>
                                         @else
                                             <span class="text-muted small">-</span>
                                         @endif
@@ -105,4 +107,23 @@
         </div>
     </div>
 </div>
+
+{{-- Modal foto bukti (di luar tabel supaya tampilannya tidak rusak) --}}
+@foreach($komplains as $item)
+    @if($item->foto)
+        <div class="modal fade" id="bukti{{ $item->id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Bukti komplain</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <img src="{{ asset('storage/' . $item->foto) }}" class="img-fluid rounded" alt="Bukti">
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+@endforeach
 @endsection
