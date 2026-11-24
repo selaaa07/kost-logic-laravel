@@ -9,6 +9,8 @@ use App\Http\Controllers\PenghuniController;
 use App\Http\Controllers\KomplainController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\KamarController;
+use App\Http\Controllers\PembayaranAdminController;
+use App\Http\Controllers\UserDashboardController;
 
 Route::get('/', [LandingController::class, 'index']);
 
@@ -34,14 +36,24 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
 
 // Route Khusus Penghuni
 Route::middleware(['auth', 'role:penghuni'])->prefix('user')->group(function () {
-    Route::get('/dashboard', function () {
-        return 'Halo Penghuni (' . auth()->user()->name . ')! Login berhasil. <form method="POST" action="/logout">' . csrf_field() . '<button type="submit">Logout</button></form>';
-    })->name('user.dashboard');
-
+    Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
+    Route::post('/pembayaran/{id}/bayar', [UserDashboardController::class, 'bayar'])->name('user.pembayaran.bayar');
     Route::get('/ubah-password', [PasswordController::class, 'form'])->name('user.ubah-password');
     Route::post('/ubah-password', [PasswordController::class, 'update'])->name('user.ubah-password.update');
 
     // Komplain - USER
     Route::get('/komplain', [KomplainController::class, 'indexUser'])->name('user.komplain');
     Route::post('/komplain', [KomplainController::class, 'store'])->name('user.komplain.store');
+});
+
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
+    Route::get('/pembayaran', [PembayaranAdminController::class, 'index'])->name('admin.pembayaran.index');
+    Route::post('/pembayaran', [PembayaranAdminController::class, 'store'])->name('admin.pembayaran.store');
+    Route::patch('/pembayaran/{id}/verifikasi', [PembayaranAdminController::class, 'verifikasi'])->name('admin.pembayaran.verifikasi');
+    Route::get('/pembayaran/laporan/cetak', [PembayaranAdminController::class, 'cetakLaporan'])->name('admin.pembayaran.laporan');
+});
+
+Route::middleware(['auth', 'role:penghuni'])->prefix('user')->group(function () {
+    Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
+    Route::post('/pembayaran/{id}/bayar', [UserDashboardController::class, 'bayar'])->name('user.pembayaran.bayar');
 });
