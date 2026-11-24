@@ -51,6 +51,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::post('/pembayaran', [PembayaranAdminController::class, 'store'])->name('admin.pembayaran.store');
     Route::patch('/pembayaran/{id}/verifikasi', [PembayaranAdminController::class, 'verifikasi'])->name('admin.pembayaran.verifikasi');
     Route::get('/pembayaran/laporan/cetak', [PembayaranAdminController::class, 'cetakLaporan'])->name('admin.pembayaran.laporan');
+    Route::put('/pembayaran/{id}', [PembayaranAdminController::class, 'update'])->name('admin.pembayaran.update');
+    Route::delete('/pembayaran/{id}', [PembayaranAdminController::class, 'destroy'])->name('admin.pembayaran.destroy');
 });
 
 Route::middleware(['auth', 'role:penghuni'])->prefix('user')->group(function () {
